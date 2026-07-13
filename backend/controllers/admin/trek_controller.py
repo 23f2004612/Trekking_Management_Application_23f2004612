@@ -6,15 +6,30 @@ from flask import request
 from datetime import datetime
 from models.user import User
 from extensions import db
+from services.redis_service import (
+    get_cache,
+    set_cache,
+    delete_cache
+)
 
 @admin_required
 def get_treks():
+
+    cache_key = "admin_treks"
+
+    cached = get_cache(cache_key)
+
+    if cached is not None:
+        return cached, 200
 
     treks = Trek.query.order_by(
         Trek.start_date
     ).all()
 
-    return treks_schema.dump(treks), 200
+    result = treks_schema.dump(treks)
+
+    set_cache(cache_key, result)
+    return result, 200
 
 @admin_required
 def create_trek():
@@ -77,6 +92,10 @@ def create_trek():
     db.session.add(trek)
 
     db.session.commit()
+
+    delete_cache("available_treks")
+    delete_cache("admin_dashboard")
+    delete_cache("admin_treks")
 
     return jsonify({
         "message":"Trek Created"
@@ -141,6 +160,10 @@ def update_trek(trek_id):
 
     db.session.commit()
 
+    delete_cache("available_treks")
+    delete_cache("admin_dashboard")
+    delete_cache("admin_treks")
+
     return jsonify({
         "message":"Updated Successfully"
     }),200
@@ -154,6 +177,10 @@ def delete_trek(trek_id):
 
     db.session.commit()
 
+    delete_cache("available_treks")
+    delete_cache("admin_dashboard")
+    delete_cache("admin_treks")
+    
     return jsonify({
         "message":"Trek Closed"
     }),200
