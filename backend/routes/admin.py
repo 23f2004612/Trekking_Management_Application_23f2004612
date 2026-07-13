@@ -4,6 +4,12 @@ from controllers.admin.dashboard_controller import *
 from controllers.admin.user_controller import *
 from controllers.admin.staff_controller import *
 from controllers.admin.trek_controller import *
+from controllers.admin.search_controller import (
+    search_users,
+    search_staff,
+    search_treks
+)
+
 
 admin_bp = Blueprint(
     "admin",
@@ -81,3 +87,21 @@ admin_bp.add_url_rule(
     methods=["DELETE"]
 )
 
+#Search
+admin_bp.add_url_rule(
+    "/search/users",
+    view_func=search_users,
+    methods=["GET"]
+)
+
+admin_bp.add_url_rule(
+    "/search/staff",
+    view_func=search_staff,
+    methods=["GET"]
+)
+
+admin_bp.add_url_rule(
+    "/search/treks",
+    view_func=search_treks,
+    methods=["GET"]
+)

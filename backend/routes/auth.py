@@ -52,6 +52,17 @@ def register():
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
+        return jsonify({
+            "message": "Registration failed"
+        }), 400
+
+    return jsonify({
+        "message": "Registration successful"
+    }), 201
+
+@auth_bp.route("/login", methods=["POST"])
+def login():
+
     data = request.get_json()
 
     email = data.get("email")
@@ -73,7 +84,7 @@ def register():
         return jsonify({
             "message": "Account Disabled"
         }), 403
-    
+
     login_user(user)
 
     return jsonify({
