@@ -5,7 +5,7 @@ from extensions import db
 
 def create_admin():
 
-    admin = User.query.filter_by(role="admin").first()
+    admin = User.query.filter_by(email=os.environ.get("ADMIN_EMAIL")).first()
 
     if admin:
         return

@@ -7,6 +7,12 @@ class Config:
     SQLALCHEMY_DATABASE_URI = \
         "sqlite:///" + os.path.join(BASE_DIR, "instance", "trek.db")
 
+    # Flask-Login Session Configuration
+    SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    PERMANENT_SESSION_LIFETIME = 3600  # 1 hour
+
     REDIS_HOST = "localhost"
     REDIS_PORT = 6379
     REDIS_DB = 0

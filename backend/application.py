@@ -1,6 +1,8 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, session
 from config import Config
 from extensions import db, migrate, login_manager, ma
+from flask_cors import CORS
+from sqlalchemy.exc import OperationalError
 
 from models import User
 from services.admin_initializer import create_admin
@@ -20,6 +22,15 @@ def create_app(init_admin=True):
 
     app = Flask(__name__)
     app.config.from_object(Config)
+    app.config['SESSION_COOKIE_SECURE'] = False  # Development setting
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    
+    CORS(
+        app,
+        supports_credentials=True,
+        origins=["http://localhost:5173"]
+    )
 
     db.init_app(app)
     ma.init_app(app)
@@ -37,6 +48,8 @@ def create_app(init_admin=True):
 
     if init_admin:
         with app.app_context():
-            create_admin()
-
+            try:
+                create_admin()
+            except OperationalError:
+                pass
     return app

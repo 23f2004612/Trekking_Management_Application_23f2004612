@@ -69,7 +69,7 @@ def login():
     password = data.get("password")
 
     user = User.query.filter_by(email=email).first()
-
+    
     if not user:
         return jsonify({
             "message": "Invalid Credentials"
@@ -85,13 +85,16 @@ def login():
             "message": "Account Disabled"
         }), 403
 
-    login_user(user)
+    login_user(user, remember=True)
 
     return jsonify({
         "message": "Login Successful",
+        "id": user.id,
         "role": user.role,
         "user_id": user.id,
-        "name": user.full_name
+        "name": user.full_name,
+        "full_name": user.full_name,
+        "email": user.email
     }), 200
 
 @auth_bp.route("/logout", methods=["POST"])
@@ -109,6 +112,7 @@ def me():
     return jsonify({
         "id": current_user.id,
         "name": current_user.full_name,
+        "full_name": current_user.full_name,
         "email": current_user.email,
         "role": current_user.role
     })
