@@ -6,24 +6,24 @@
 
     <form @submit.prevent="register">
       <div class="mb-3">
-        <label>Full Name</label>
+        <label class="form-label">Full Name</label>
 
         <input v-model="form.full_name" class="form-control" required />
       </div>
 
       <div class="mb-3">
-        <label>Email</label>
+        <label class="form-label">Email</label>
         <input v-model="form.email" type="email" class="form-control" required />
       </div>
 
       <div class="mb-3">
-        <label>Phone</label>
+        <label class="form-label">Phone</label>
 
         <input v-model="form.contact_number" class="form-control" />
       </div>
 
       <div class="mb-4">
-        <label>Password</label>
+        <label class="form-label">Password</label>
         <input v-model="form.password" type="password" class="form-control" required />
       </div>
 
@@ -70,7 +70,39 @@ async function register() {
 <style scoped>
 .auth-card {
   width: 450px;
-
   border-radius: 20px;
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #3b3b3b;
+  margin-bottom: 6px;
+}
+
+.form-control {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #dcdcdc;
+}
+
+.form-control:focus {
+  border-color: #184e37;
+  box-shadow: 0 0 0 3px rgba(24, 78, 55, 0.15);
+}
+
+.btn-primary-custom {
+  background: #184e37;
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  font-weight: 600;
+  width: 100%;
+  transition: background 0.2s ease;
+}
+
+.btn-primary-custom:hover {
+  background: #133d2b;
+  color: #fff;
 }
 </style>

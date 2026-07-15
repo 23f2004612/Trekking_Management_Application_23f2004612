@@ -26,6 +26,11 @@ export const useAuthStore = defineStore("auth",{
             this.user = user;
             this.role = user.role;
             this.loggedIn = true;
+
+            localStorage.setItem(
+                "authUser",
+                JSON.stringify(user)
+            );
         },   
 
         logout(){

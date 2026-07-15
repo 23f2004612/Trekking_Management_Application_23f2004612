@@ -6,12 +6,12 @@
 
     <form @submit.prevent="login">
       <div class="mb-3">
-        <label for="login-email">Email</label>
+        <label for="login-email" class="form-label">Email</label>
         <input id="login-email" v-model="email" type="email" class="form-control" required />
       </div>
 
       <div class="mb-4">
-        <label for="login-password">Password</label>
+        <label for="login-password" class="form-label">Password</label>
 
         <input
           id="login-password"
@@ -52,11 +52,14 @@ async function login() {
   try {
     const response = await loginUser({
       email: email.value,
-
       password: password.value,
     })
 
-    auth.setUser(response.data)
+    auth.setUser({
+      id: response.data.user_id,
+      name: response.data.name,
+      role: response.data.role
+    })
 
     if (response.data.role === 'admin') {
       router.push('/admin')
@@ -75,7 +78,39 @@ async function login() {
 <style scoped>
 .auth-card {
   width: 430px;
-
   border-radius: 20px;
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #3b3b3b;
+  margin-bottom: 6px;
+}
+
+.form-control {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #dcdcdc;
+}
+
+.form-control:focus {
+  border-color: #184e37;
+  box-shadow: 0 0 0 3px rgba(24, 78, 55, 0.15);
+}
+
+.btn-primary-custom {
+  background: #184e37;
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  font-weight: 600;
+  width: 100%;
+  transition: background 0.2s ease;
+}
+
+.btn-primary-custom:hover {
+  background: #133d2b;
+  color: #fff;
 }
 </style>
