@@ -1,85 +1,100 @@
 <template>
   <DashboardLayout>
+    <div class="mb-4">
+      <h2 class="fw-bold">Staff Dashboard</h2>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2>Assigned Treks</h2>
+      <p class="text-muted">Welcome back. Here's a quick overview of your assigned treks.</p>
     </div>
 
     <Loader v-if="loading" />
 
-    <EmptyState
-      v-else-if="treks.length===0"
-      title="No Treks Assigned"
-    />
-
-    <div v-else class="row">
-
-      <div
-        class="col-lg-4 mb-4"
-        v-for="trek in treks"
-        :key="trek.id"
-      >
-
-        <TrekCard
-          :trek="trek"
-          :showActions="false"
-        />
-
-        <div class="card border-top-0">
-
+    <div v-else class="row g-4">
+      <div class="col-md-6">
+        <div class="card summary-card">
           <div class="card-body">
+            <small class="text-muted"> Assigned Treks </small>
 
-            <p>
-              <strong>Booked :</strong>
-
-              {{ trek.booked_slots }}/{{ trek.available_slots }}
-            </p>
-
-            <RouterLink
-              class="btn btn-success w-100"
-              :to="`/staff/trek/${trek.id}`"
-            >
-              View Bookings
-            </RouterLink>
-
+            <h2>
+              {{ totalTreks }}
+            </h2>
           </div>
-
         </div>
-
       </div>
 
-    </div>
+      <div class="col-md-6">
+        <div class="card summary-card">
+          <div class="card-body">
+            <small class="text-muted"> Total Participants </small>
 
+            <h2>
+              {{ totalBookings }}
+            </h2>
+          </div>
+        </div>
+      </div>
+    </div>
   </DashboardLayout>
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from 'vue'
 
-import { ref,onMounted } from "vue";
+import DashboardLayout from '@/components/dashboard/DashboardLayout.vue'
 
-import DashboardLayout from "@/components/dashboard/DashboardLayout.vue";
-import Loader from "@/components/common/Loader.vue";
-import EmptyState from "@/components/common/EmptyState.vue";
-import TrekCard from "@/components/trek/TrekCard.vue";
+import Loader from '@/components/common/Loader.vue'
 
-import { assignedTreks } from "@/services/staffService";
+import { getAssignedTreks } from '@/services/staffService'
 
-const loading = ref(false);
+import { useToastStore } from '@/store/toast'
 
-const treks = ref([]);
+const toast = useToastStore()
 
-async function loadTreks(){
+const loading = ref(false)
 
-    loading.value=true;
+const treks = ref([])
 
-    const res = await assignedTreks();
+const totalTreks = computed(() => treks.value.length)
 
-    treks.value=res.data;
+const totalBookings = computed(() =>
+  treks.value.reduce(
+    (sum, trek) => sum + trek.booked_slots,
 
-    loading.value=false;
+    0,
+  ),
+)
 
+async function loadDashboard() {
+  loading.value = true
+
+  try {
+    const res = await getAssignedTreks()
+
+    treks.value = res.data
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Unable to load dashboard')
+  } finally {
+    loading.value = false
+  }
 }
 
-onMounted(loadTreks);
-
+onMounted(loadDashboard)
 </script>
+<style scoped>
+.summary-card {
+  border: none;
+
+  border-radius: 18px;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.summary-card h2 {
+  margin-top: 10px;
+
+  font-weight: 700;
+
+  color: #184e37;
+
+  font-size: 2.2rem;
+}
+</style>

@@ -5,13 +5,15 @@ import Register from '../views/Register.vue'
 import { useAuthStore } from '@/store/auth'
 import AdminDashboard from '@/views/admin/Dashboard.vue'
 import Treks from '@/views/admin/Treks.vue'
-import StaffDashboard from '@/views/staff/Dashboard.vue'
 import Browse from '@/views/user/Browse.vue'
 import Bookings from '@/views/user/Bookings.vue'
+import Staff from '@/views/admin/Staff.vue'
+
 import StaffTrekBookings from '@/views/staff/TrekBookings.vue'
-import StaffProfile from "@/views/staff/Profile.vue";
-import Staff from "@/views/admin/Staff.vue";
-import Users from "@/views/admin/Users.vue";
+import StaffDashboard from '@/views/staff/Dashboard.vue'
+import StaffTreks from "@/views/staff/StaffTreks.vue";
+
+import Users from '@/views/admin/Users.vue'
 
 const routes = [
   {
@@ -54,25 +56,36 @@ const routes = [
     meta: { requiresAuth: true, requiredRole: 'admin' },
   },
   {
-    path: "/admin/staff",
+    path: '/admin/staff',
     component: Staff,
     meta: {
-        requiresAuth: true,
-        role: "admin",
+      requiresAuth: true,
+      role: 'admin',
     },
   },
   {
-    path: "/admin/users",
+    path: '/admin/users',
     component: Users,
     meta: {
-        requiresAuth: true,
-        role: "admin",
+      requiresAuth: true,
+      role: 'admin',
     },
   },
   {
     path: '/staff',
     component: StaffDashboard,
-    meta: { requiresAuth: true, requiredRole: 'staff' },
+    meta: {
+      requiresAuth: true,
+      requiredRole: 'staff',
+    },
+  },
+  {
+    path: '/staff/treks',
+    component: StaffTreks,
+    meta: {
+      requiresAuth: true,
+      requiredRole: 'staff',
+    },
   },
   {
     path: '/staff/trek/:id',
@@ -82,14 +95,6 @@ const routes = [
       requiredRole: 'staff',
     },
   },
-  {
-    path:"/staff/profile",
-    component:StaffProfile,
-    meta:{
-        requiresAuth:true,
-        requiredRole:"staff"
-    }
-  }
 ]
 
 const router = createRouter({

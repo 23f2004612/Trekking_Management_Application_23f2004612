@@ -1,151 +1,213 @@
 <template>
   <DashboardLayout>
-
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2>Trek Bookings</h2>
+      <div>
+        <h2 class="page-title">Trek Participants</h2>
+        <p class="text-muted mb-0">View all registered participants for this trek.</p>
+      </div>
 
-      <RouterLink
-        to="/staff"
-        class="btn btn-outline-success"
-      >
+      <RouterLink to="/staff/treks" class="btn btn-outline-success">
+        <i class="bi bi-arrow-left me-1"></i>
         Back
       </RouterLink>
     </div>
 
+    <SearchBar @search="searchParticipants" />
+
     <Loader v-if="loading" />
 
     <EmptyState
-      v-else-if="bookings.length===0"
-      title="No Bookings Found"
+      v-else-if="participants.length === 0"
+      :title="searching ? 'No Matching Participants' : 'No Participants Found'"
+      :message="
+        searching
+          ? 'Try searching with a different keyword.'
+          : 'No users have booked this trek yet.'
+      "
+      :icon="searching ? 'bi bi-search' : 'bi bi-people'"
     />
 
-    <div v-else class="card">
-
+    <div v-else class="table-card mt-4">
       <div class="table-responsive">
-
         <table class="table align-middle mb-0">
-
           <thead>
-
             <tr>
-              <th>User</th>
-              <th>Email</th>
-              <th>Booking Date</th>
-              <th>Status</th>
-              <th width="170">Action</th>
-            </tr>
+              <th>Name</th>
 
+              <th>Email</th>
+
+              <th>Contact</th>
+
+              <th>Booked On</th>
+
+              <th>Status</th>
+            </tr>
           </thead>
 
           <tbody>
+            <tr v-for="booking in participants" :key="booking.id">
+              <td class="fw-semibold">
+                {{ booking.user.full_name }}
+              </td>
 
-            <tr
-              v-for="booking in bookings"
-              :key="booking.id"
-            >
-
-              <td>{{ booking.user.full_name }}</td>
-
-              <td>{{ booking.user.email }}</td>
-
-              <td>{{ booking.booking_date }}</td>
+              <td class="text-muted-cell">
+                {{ booking.user.email }}
+              </td>
 
               <td>
+                {{ booking.user.contact_number }}
+              </td>
 
-                <span
-                  class="badge"
-                  :class="{
-                    'bg-success':booking.booking_status==='Booked',
-                    'bg-primary':booking.booking_status==='Completed',
-                    'bg-danger':booking.booking_status==='Cancelled'
-                  }"
-                >
+              <td>
+                {{ formatDate(booking.booking_date) }}
+              </td>
+
+              <td>
+                <span class="badge" :class="badgeClass(booking.booking_status)">
                   {{ booking.booking_status }}
                 </span>
-
               </td>
-
-              <td>
-
-                <select
-                  class="form-select"
-                  v-model="booking.booking_status"
-                  @change="changeStatus(booking)"
-                >
-
-                  <option>Booked</option>
-
-                  <option>Completed</option>
-
-                  <option>Cancelled</option>
-
-                </select>
-
-              </td>
-
             </tr>
-
           </tbody>
-
         </table>
-
       </div>
-
     </div>
-
   </DashboardLayout>
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 
-import { ref,onMounted } from "vue";
+import { useRoute } from 'vue-router'
 
-import { useRoute } from "vue-router";
+import DashboardLayout from '@/components/dashboard/DashboardLayout.vue'
+import SearchBar from '@/components/dashboard/SearchBar.vue'
 
-import DashboardLayout from "@/components/dashboard/DashboardLayout.vue";
+import Loader from '@/components/common/Loader.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
 
-import Loader from "@/components/common/Loader.vue";
+import { getParticipants } from '@/services/staffService'
 
-import EmptyState from "@/components/common/EmptyState.vue";
+import { useToastStore } from '@/store/toast'
 
-import {
+const toast = useToastStore()
 
-    trekBookings,
+const route = useRoute()
 
-    updateBooking
+const loading = ref(false)
 
-} from "@/services/staffService";
+const participants = ref([])
 
-const route=useRoute();
+const allParticipants = ref([])
+const searching = ref(false)
 
-const bookings=ref([]);
+async function loadParticipants() {
+  loading.value = true
 
-const loading=ref(false);
+  try {
+    const res = await getParticipants(route.params.id)
 
-async function loadBookings(){
+    participants.value = res.data
 
-    loading.value=true;
-
-    const res=await trekBookings(route.params.id);
-
-    bookings.value=res.data;
-
-    loading.value=false;
-
+    allParticipants.value = [...res.data]
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Unable to load participants')
+  } finally {
+    loading.value = false
+  }
 }
 
-async function changeStatus(booking){
+function searchParticipants(value = '') {
+  const q = value.toLowerCase().trim()
+  searching.value = value.trim() !== "";
+  
+  if (!q) {
+    participants.value = [...allParticipants.value]
 
-    await updateBooking(
+    return
+  }
 
-        booking.id,
-
-        booking.booking_status
-
-    );
-
+  participants.value = allParticipants.value.filter(
+    (booking) =>
+      booking.user.full_name.toLowerCase().includes(q) ||
+      booking.user.email.toLowerCase().includes(q) ||
+      booking.booking_status.toLowerCase().includes(q),
+  )
 }
 
-onMounted(loadBookings);
+function badgeClass(status) {
+  switch (status) {
+    case 'Booked':
+      return 'badge-active'
 
+    case 'Completed':
+      return 'badge-completed'
+
+    case 'Cancelled':
+      return 'badge-blacklisted'
+
+    default:
+      return 'bg-secondary'
+  }
+}
+
+function formatDate(date) {
+  if (!date) return '-'
+
+  return new Date(date).toLocaleDateString()
+}
+
+onMounted(loadParticipants)
 </script>
+
+<style scoped>
+.table-card {
+  background: white;
+
+  border-radius: 18px;
+
+  padding: 20px;
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.page-title {
+  font-weight: 700;
+}
+
+.text-muted-cell {
+  color: #777;
+}
+
+.badge {
+  padding: 8px 14px;
+
+  border-radius: 20px;
+
+  font-weight: 600;
+}
+
+.badge-active {
+  background: #dff7e8;
+
+  color: #167347;
+}
+
+.badge-blacklisted {
+  background: #fde7e7;
+
+  color: #c0392b;
+}
+
+.badge-completed {
+  background: #ececec;
+
+  color: #555;
+}
+
+thead th {
+  font-weight: 700;
+
+  color: #555;
+}
+</style>

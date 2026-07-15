@@ -1,35 +1,21 @@
 import api from "./api";
 
-export function assignedTreks(){
-
-    return api.get("/staff/treks");
-
+export function getDashboard() {
+  return api.get("/staff/dashboard");
 }
 
-export function trekBookings(id){
-
-    return api.get(`/staff/treks/${id}`);
-
+export function getAssignedTreks() {
+  return api.get("/staff/my-treks");
 }
 
-export function updateBooking(id,status){
-
-    return api.put(`/staff/booking/${id}`,{
-
-        booking_status:status
-
-    });
-
+export function updateTrek(id, data) {
+  return api.put(`/staff/treks/${id}`, data);
 }
 
-export function getProfile(){
-
-    return api.get("/staff/profile");
-
+export function getParticipants(id) {
+  return api.get(`/staff/treks/${id}/participants`);
 }
 
-export function updateProfile(data){
-
-    return api.put("/staff/profile",data);
-
+export function completeTrek(id) {
+  return api.put(`/staff/treks/${id}/complete`);
 }
