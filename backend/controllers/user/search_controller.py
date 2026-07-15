@@ -4,10 +4,9 @@ from decorators.roles import user_required
 from models.trek import Trek
 from schemas.trek_schema import treks_schema
 
-@user_required
 def search_treks():
 
-    q = request.args.get("q", "").strip()
+    q = request.args.get("query", "").strip()
 
     treks = Trek.query.filter(
 

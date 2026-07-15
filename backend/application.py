@@ -15,6 +15,7 @@ from routes.user import user_bp
 
 @login_manager.user_loader
 def load_user(user_id):
+    print("LOAD USER:", user_id)
     return User.query.get(int(user_id))
 
 

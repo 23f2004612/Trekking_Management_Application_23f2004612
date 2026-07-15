@@ -11,12 +11,11 @@ from services.redis_service import (
     set_cache,
     delete_cache
 )
+from datetime import datetime
 
 @admin_required
 def get_treks():
-
     cache_key = "admin_treks"
-
     cached = get_cache(cache_key)
 
     if cached is not None:
@@ -105,7 +104,6 @@ def create_trek():
 def update_trek(trek_id):
 
     trek = Trek.query.get_or_404(trek_id)
-
     data = request.get_json()
 
     trek.trek_name = data.get(
@@ -123,6 +121,16 @@ def update_trek(trek_id):
         trek.description
     )
 
+    trek.difficulty = data.get(
+        "difficulty",
+        trek.difficulty
+    )
+
+    trek.duration = data.get(
+        "duration",
+        trek.duration
+    )
+
     trek.available_slots = data.get(
         "available_slots",
         trek.available_slots
@@ -130,33 +138,49 @@ def update_trek(trek_id):
 
     if trek.available_slots < trek.booked_slots:
         return jsonify({
-            "message": "available_slots cannot be less than booked_slots"
-        }), 400    
+            "message": "Available slots cannot be less than booked slots."
+        }), 400
 
-    trek.duration = data.get(
-        "duration",
-        trek.duration
+    trek.status = data.get(
+        "status",
+        trek.status
     )
 
-    trek.difficulty = data.get(
-        "difficulty",
-        trek.difficulty
-    )
+    if "start_date" in data:
+        trek.start_date = (
+            datetime.strptime(data["start_date"], "%Y-%m-%d").date()
+            if data["start_date"]
+            else None
+        )
+
+    if "end_date" in data:
+        trek.end_date = (
+            datetime.strptime(data["end_date"], "%Y-%m-%d").date()
+            if data["end_date"]
+            else None
+        )
 
     if "assigned_staff_id" in data:
 
-        staff = User.query.filter_by(
-            id=data["assigned_staff_id"],
-            role="staff",
-            status="active"
-        ).first()
+        staff_id = data.get("assigned_staff_id")
 
-        if not staff:
-            return jsonify({
-                "message":"Invalid Staff"
-            }),404
+        if staff_id is None:
+            trek.assigned_staff_id = None
 
-        trek.assigned_staff_id = data["assigned_staff_id"]
+        else:
+
+            staff = User.query.filter_by(
+                id=staff_id,
+                role="staff",
+                status="active"
+            ).first()
+
+            if not staff:
+                return jsonify({
+                    "message": "Invalid Staff"
+                }), 404
+
+            trek.assigned_staff_id = staff.id
 
     db.session.commit()
 
@@ -165,8 +189,8 @@ def update_trek(trek_id):
     delete_cache("admin_treks")
 
     return jsonify({
-        "message":"Updated Successfully"
-    }),200
+        "message": "Updated Successfully"
+    }), 200
 
 @admin_required
 def delete_trek(trek_id):

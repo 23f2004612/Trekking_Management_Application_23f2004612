@@ -78,12 +78,9 @@ def update_staff(staff_id):
     staff = User.query.get_or_404(staff_id)
 
     if staff.role != "staff":
-
         return jsonify({
-
-            "message":"Invalid Staff"
-
-        }),404
+            "message": "Invalid Staff"
+        }), 404
 
     data = request.get_json()
 
@@ -107,13 +104,16 @@ def update_staff(staff_id):
         staff.experience
     )
 
+    # NEW
+    if "status" in data:
+        staff.status = data["status"]
+
     db.session.commit()
 
     return jsonify({
+        "message": "Updated"
+    }), 200
 
-        "message":"Updated"
-
-    }),200
 
 @admin_required
 def delete_staff(staff_id):

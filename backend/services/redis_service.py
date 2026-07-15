@@ -7,28 +7,59 @@ redis_client = redis.Redis(
     port=Config.REDIS_PORT,
     db=Config.REDIS_DB,
     decode_responses=True,
-    socket_timeout=2,
-    socket_connect_timeout=2,
+    socket_connect_timeout=0.2,
+    socket_timeout=0.2,
 )
+
+try:
+    redis_client.ping()
+    REDIS_AVAILABLE = True
+    print("Redis Connected")
+except Exception:
+    REDIS_AVAILABLE = False
+    print("Redis Unavailable - Cache Disabled")
+
 
 def get_cache(key):
 
-    data = redis_client.get(key)
+    if not REDIS_AVAILABLE:
+        return None
 
-    if data:
-        return json.loads(data)
+    try:
+        data = redis_client.get(key)
+
+        if data:
+            return json.loads(data)
+
+    except Exception:
+        return None
 
     return None
 
 
 def set_cache(key, value, expiry=300):
 
-    redis_client.setex(
-        key,
-        expiry,
-        json.dumps(value)
-    )
+    if not REDIS_AVAILABLE:
+        return
+
+    try:
+        redis_client.setex(
+            key,
+            expiry,
+            json.dumps(value)
+        )
+
+    except Exception:
+        pass
 
 
 def delete_cache(key):
-    redis_client.delete(key)
+
+    if not REDIS_AVAILABLE:
+        return
+
+    try:
+        redis_client.delete(key)
+
+    except Exception:
+        pass

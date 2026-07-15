@@ -7,27 +7,41 @@ from services.redis_service import (
     set_cache
 )
 
-@user_required
 def available_treks():
 
     cache_key = "available_treks"
 
-    cached = get_cache(cache_key)
+    cached = None
+    try:
+        cached = get_cache(cache_key)
+    except Exception:
+        pass
 
-    if cached:
-        return cached, 200
+    if cached is not None:
+        return jsonify({
+            "success": True,
+            "treks": cached
+        }), 200
 
-    treks = Trek.query.filter_by(
-        status="Open"
-    ).all()
-
+    treks = Trek.query.filter_by(status="Open").all()
     result = treks_schema.dump(treks)
 
-    set_cache(cache_key, result)
+    if result:
+        try:
+            set_cache(cache_key, result)
+        except Exception:
+            pass
+ 
+    return jsonify({
+        "success": True,
+        "treks": result,
+        "message": (
+            "No treks available at the moment."
+            if not result
+            else None
+        )
+    }), 200
 
-    return result, 200
-
-@user_required
 def trek_details(trek_id):
     trek = Trek.query.get_or_404(trek_id)
     return trek_schema.dump(trek),200

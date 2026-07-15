@@ -19,7 +19,7 @@ class TrekSchema(ma.SQLAlchemySchema):
     end_date = ma.auto_field()
     status = ma.auto_field()
 
-    assigned_staff = fields.Nested(
+    staff = fields.Nested(
         UserSchema,
         only=("id", "full_name")
     )
