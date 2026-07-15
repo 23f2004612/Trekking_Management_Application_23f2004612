@@ -51,14 +51,14 @@ async function logout() {
             <RouterLink class="nav-link" to="/browse"> Browse Treks </RouterLink>
           </li>
 
-          <li v-if="auth.loggedIn && auth.role === 'user'" class="nav-item">
-            <RouterLink class="nav-link" to="/bookings">My Bookings</RouterLink>
-          </li>
           <li v-if="auth.role === 'admin'" class="nav-item">
             <RouterLink class="nav-link" to="/admin">Dashboard</RouterLink>
           </li>
           <li v-else-if="auth.role === 'staff'" class="nav-item">
             <RouterLink class="nav-link" to="/staff">Dashboard</RouterLink>
+          </li>
+          <li v-else-if="auth.role === 'user'" class="nav-item">
+            <RouterLink class="nav-link" to="/bookings">Dashboard</RouterLink>
           </li>
         </ul>
 

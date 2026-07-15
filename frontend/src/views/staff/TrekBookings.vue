@@ -33,39 +33,33 @@
           <thead>
             <tr>
               <th>Name</th>
-
               <th>Email</th>
-
               <th>Contact</th>
-
-              <th>Booked On</th>
-
-              <th>Status</th>
+              <th>Joined</th>
+              <th>User Status</th>
             </tr>
           </thead>
 
           <tbody>
-            <tr v-for="booking in participants" :key="booking.id">
+            <tr v-for="user in participants" :key="user.id">
               <td class="fw-semibold">
-                {{ booking.user.full_name }}
+                {{ user.full_name }}
               </td>
 
               <td class="text-muted-cell">
-                {{ booking.user.email }}
+                {{ user.email }}
               </td>
 
               <td>
-                {{ booking.user.contact_number }}
+                {{ user.contact_number || '-' }}
               </td>
 
               <td>
-                {{ formatDate(booking.booking_date) }}
+                {{ formatDate(user.created_at) }}
               </td>
 
               <td>
-                <span class="badge" :class="badgeClass(booking.booking_status)">
-                  {{ booking.booking_status }}
-                </span>
+                <span class="badge badge-active"> Registered </span>
               </td>
             </tr>
           </tbody>
@@ -106,9 +100,7 @@ async function loadParticipants() {
 
   try {
     const res = await getParticipants(route.params.id)
-
     participants.value = res.data
-
     allParticipants.value = [...res.data]
   } catch (err) {
     toast.error(err.response?.data?.message || 'Unable to load participants')
@@ -119,8 +111,8 @@ async function loadParticipants() {
 
 function searchParticipants(value = '') {
   const q = value.toLowerCase().trim()
-  searching.value = value.trim() !== "";
-  
+  searching.value = value.trim() !== ''
+
   if (!q) {
     participants.value = [...allParticipants.value]
 
@@ -128,27 +120,11 @@ function searchParticipants(value = '') {
   }
 
   participants.value = allParticipants.value.filter(
-    (booking) =>
-      booking.user.full_name.toLowerCase().includes(q) ||
-      booking.user.email.toLowerCase().includes(q) ||
-      booking.booking_status.toLowerCase().includes(q),
+    (user) =>
+      user.full_name.toLowerCase().includes(q) ||
+      user.email.toLowerCase().includes(q) ||
+      (user.contact_number || "").toLowerCase().includes(q)
   )
-}
-
-function badgeClass(status) {
-  switch (status) {
-    case 'Booked':
-      return 'badge-active'
-
-    case 'Completed':
-      return 'badge-completed'
-
-    case 'Cancelled':
-      return 'badge-blacklisted'
-
-    default:
-      return 'bg-secondary'
-  }
 }
 
 function formatDate(date) {
@@ -191,18 +167,6 @@ onMounted(loadParticipants)
   background: #dff7e8;
 
   color: #167347;
-}
-
-.badge-blacklisted {
-  background: #fde7e7;
-
-  color: #c0392b;
-}
-
-.badge-completed {
-  background: #ececec;
-
-  color: #555;
 }
 
 thead th {

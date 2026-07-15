@@ -14,6 +14,7 @@ import StaffDashboard from '@/views/staff/Dashboard.vue'
 import StaffTreks from "@/views/staff/StaffTreks.vue";
 
 import Users from '@/views/admin/Users.vue'
+import Profile from "@/views/user/Profile.vue";
 
 const routes = [
   {
@@ -45,6 +46,14 @@ const routes = [
       requiredRole: 'user',
     },
   },
+  {
+    path:"/profile",
+    component:Profile,
+    meta:{
+      requiresAuth:true,
+      requiredRole:"user"
+      }
+    },
   {
     path: '/admin',
     component: AdminDashboard,

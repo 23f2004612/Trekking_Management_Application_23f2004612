@@ -39,10 +39,14 @@
 
       <button
         class="btn-book"
-        :disabled="trek.status !== 'Open' || trek.available_slots - trek.booked_slots <= 0"
+        :disabled="
+          trek.status !== 'Open' ||
+          (trek.available_slots - trek.booked_slots <= 0) ||
+          trek.already_booked
+        "
         @click="$emit('book', trek.id)"
       >
-        Book Now
+        {{ trek.already_booked ? 'Already Booked' : 'Book Now' }}
       </button>
     </div>
   </div>
@@ -57,12 +61,13 @@ const props = defineProps({
 
 defineEmits(['book'])
 
-const difficultyClass = computed(() =>
-  ({
-    Easy: 'diff-easy',
-    Moderate: 'diff-moderate',
-    Hard: 'diff-hard',
-  })[props.trek.difficulty] || 'diff-moderate',
+const difficultyClass = computed(
+  () =>
+    ({
+      Easy: 'diff-easy',
+      Moderate: 'diff-moderate',
+      Hard: 'diff-hard',
+    })[props.trek.difficulty] || 'diff-moderate',
 )
 
 function formatDate(dateStr) {
@@ -81,7 +86,9 @@ function formatDate(dateStr) {
   padding: 22px;
   height: 100%;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
 }
@@ -204,4 +211,3 @@ function formatDate(dateStr) {
   cursor: not-allowed;
 }
 </style>
-

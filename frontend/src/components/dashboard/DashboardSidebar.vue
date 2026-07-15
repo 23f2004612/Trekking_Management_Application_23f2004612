@@ -40,13 +40,26 @@
         <span>Assigned Treks</span>
       </RouterLink>
     </nav>
+
+    <!-- User Menu -->
+    <nav v-else-if="auth.role === 'user'" class="menu-group">
+      <RouterLink to="/bookings" class="menu">
+        <i class="bi bi-journal-check"></i>
+        <span>My Bookings</span>
+      </RouterLink>
+
+      <RouterLink to="/profile" class="menu">
+        <i class="bi bi-person-circle"></i>
+        <span>My Profile</span>
+      </RouterLink>
+    </nav>
   </div>
 </template>
 
 <script setup>
-import { useAuthStore } from "@/store/auth";
+import { useAuthStore } from '@/store/auth'
 
-const auth = useAuthStore();
+const auth = useAuthStore()
 </script>
 
 <style scoped>
@@ -66,7 +79,7 @@ const auth = useAuthStore();
 }
 
 .logo {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Georgia, 'Times New Roman', serif;
   font-weight: 700;
   margin-bottom: 4px;
 }
@@ -93,7 +106,9 @@ const auth = useAuthStore();
   border-radius: 10px;
   font-weight: 500;
   font-size: 0.95rem;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .menu i {
