@@ -6,32 +6,34 @@ from services.redis_service import (
     get_cache,
     set_cache
 )
+from flask_login import current_user
 
 def available_treks():
 
-    cache_key = "available_treks"
+    treks = Trek.query.filter_by(
+        status="Open"
+    ).order_by(
+        Trek.start_date
+    ).all()
 
-    cached = None
-    try:
-        cached = get_cache(cache_key)
-    except Exception:
-        pass
-
-    if cached is not None:
-        return jsonify({
-            "success": True,
-            "treks": cached
-        }), 200
-
-    treks = Trek.query.filter_by(status="Open").all()
     result = treks_schema.dump(treks)
 
-    if result:
-        try:
-            set_cache(cache_key, result)
-        except Exception:
-            pass
- 
+    booked = set()
+
+    if current_user.is_authenticated:
+
+        booked = {
+            booking.trek_id
+            for booking in current_user.bookings
+            if booking.booking_status == "Booked"
+        }
+
+    for trek in result:
+
+        trek["already_booked"] = (
+            trek["id"] in booked
+        )
+
     return jsonify({
         "success": True,
         "treks": result,
@@ -40,7 +42,7 @@ def available_treks():
             if not result
             else None
         )
-    }), 200
+    }), 200 
 
 def trek_details(trek_id):
     trek = Trek.query.get_or_404(trek_id)

@@ -3,7 +3,7 @@ from config import Config
 from extensions import db, migrate, login_manager, ma
 from flask_cors import CORS
 from sqlalchemy.exc import OperationalError
-
+from extensions import celery
 from models import User
 from services.admin_initializer import create_admin
 
@@ -27,6 +27,11 @@ def create_app(init_admin=True):
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     
+    celery.conf.update(
+        broker_url=app.config["CELERY_BROKER_URL"],
+        result_backend=app.config["CELERY_RESULT_BACKEND"],
+    )
+
     CORS(
         app,
         supports_credentials=True,

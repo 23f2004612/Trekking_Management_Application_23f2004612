@@ -1,13 +1,14 @@
+from datetime import datetime
 import os
-from flask import jsonify, send_file
+from flask import jsonify, send_file, request
 from flask_login import current_user
 from decorators.roles import user_required
-from extensions import db
+from extensions import db, celery
 from models.booking import Booking
 from models.trek import Trek
 from utils.booking_utils import get_user_booking_or_404
 from schemas.booking_schema import bookings_schema
-from services.redis_service import delete_cache
+from services.redis_service import delete_cache, set_cache, get_cache
 from celery.result import AsyncResult
 
 @user_required
@@ -27,29 +28,35 @@ def book_trek(trek_id):
             "message":"No Slots Available"
         }),400
 
-    booking = Booking.query.filter_by(
-
+    existing = Booking.query.filter_by(
         user_id=current_user.id,
-
-        trek_id=trek.id
-
+        trek_id=trek_id
     ).first()
 
-    if booking and booking.booking_status != "Cancelled":
+    if existing:
 
-        return jsonify({
-            "message":"Already Booked"
-        }),400
+        if existing.booking_status == "Booked":
 
-    booking = Booking(
-        user_id=current_user.id,
-        trek_id=trek.id
-    )
+            return jsonify({
+                "message": "You have already booked this trek."
+            }), 400
+
+        # Re-book a cancelled/completed booking
+        existing.booking_status = "Booked"
+        existing.booking_date = datetime.utcnow()
+        existing.remarks = None
+
+    else:
+
+        booking = Booking(
+            user_id=current_user.id,
+            trek_id=trek_id,
+            booking_status="Booked"
+        )
+
+        db.session.add(booking)
 
     trek.booked_slots += 1
-
-    db.session.add(booking)
-
     db.session.commit()
 
     delete_cache("available_treks")
@@ -116,8 +123,8 @@ def get_export_status(task_id):
     owner_id = get_cache(f"export_owner_{task_id}")
     if owner_id != current_user.id:
         return jsonify({"message": "Not found"}), 404
-        
-    task = AsyncResult(task_id)
+    
+    task = AsyncResult(task_id, app=celery)
     
     if task.state == "PENDING":
 
@@ -147,22 +154,33 @@ def get_export_status(task_id):
         if not os.path.exists(filename):
 
             return jsonify({
-                "status": "FAILURE",
+                "state": "FAILURE",
                 "message": "File not found"
-            }),404
+            }), 404
 
-        return send_file(
-
-            filename,
-
-            as_attachment=True,
-
-            download_name=os.path.basename(filename),
-
-            mimetype="text/csv"
-
-        )
+        return jsonify({
+            "state": "SUCCESS",
+            "file": filename
+        }), 200
 
     return jsonify({
-        "status": task.state
-    }),200
+        "state": task.state
+    }), 200
+
+@user_required
+def download_export():
+
+    filename = request.args.get("file")
+
+    if not filename or not os.path.exists(filename):
+
+        return jsonify({
+            "message": "File not found"
+        }),404
+
+    return send_file(
+        filename,
+        as_attachment=True,
+        download_name=os.path.basename(filename),
+        mimetype="text/csv"
+    )

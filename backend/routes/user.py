@@ -19,11 +19,12 @@ from controllers.user.booking_controller import (
 )
 
 # Profile
-from controllers.user.profile_controller import (update_profile)
+from controllers.user.profile_controller import (update_profile, get_profile)
 
 from controllers.user.search_controller import (
     search_treks
 )
+from controllers.user.booking_controller import download_export
 
 user_bp = Blueprint(
     "user",
@@ -73,6 +74,12 @@ user_bp.add_url_rule(
 # Profile API
 user_bp.add_url_rule(
     "/profile",
+    view_func=get_profile,
+    methods=["GET"]
+)
+
+user_bp.add_url_rule(
+    "/profile",
     view_func=update_profile,
     methods=["PUT"]
 )
@@ -93,5 +100,11 @@ user_bp.add_url_rule(
 user_bp.add_url_rule(
     "/export/<task_id>",
     view_func=get_export_status,
+    methods=["GET"]
+)
+
+user_bp.add_url_rule(
+    "/download",
+    view_func=download_export,
     methods=["GET"]
 )
