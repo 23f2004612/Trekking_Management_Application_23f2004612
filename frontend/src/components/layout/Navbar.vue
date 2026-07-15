@@ -91,7 +91,7 @@ async function logout() {
 
 <style scoped>
 .navbar {
-  background: #faf8f3;
+  background: #e9e7e3;
   max-height: 70px;
   padding: 14px 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);

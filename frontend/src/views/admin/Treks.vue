@@ -8,7 +8,7 @@
 
       <button class="btn-add-trek" @click="addTrek">
         <i class="bi bi-plus-lg me-1"></i>
-            Add Trek
+        Add Trek
       </button>
     </div>
 
@@ -19,11 +19,11 @@
 
     <DataTable v-else :treks="treks" @edit="editTrek" @delete="deleteTrek" />
     <TrekModal
-  :selectedTrek="selectedTrek"
-  :show="showTrekModal"
-  @close="showTrekModal = false"
-  @saved="loadTreks"
-/>
+      :selectedTrek="selectedTrek"
+      :show="showTrekModal"
+      @close="showTrekModal = false"
+      @saved="loadTreks"
+    />
   </DashboardLayout>
 </template>
 
@@ -67,9 +67,7 @@
   align-items: center;
   transition: background 0.2s ease;
 }
-
 </style>
-
 
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -104,10 +102,9 @@ async function loadTreks() {
     const response = await getTreks()
 
     treks.value = response.data
-  }catch (err) {
+  } catch (err) {
     toast.error(err.response?.data?.message || 'Failed to load treks')
-  }
-  finally {
+  } finally {
     loading.value = false
   }
 }
@@ -123,26 +120,18 @@ function editTrek(trek) {
 }
 
 async function deleteTrek(trek) {
-
   if (!confirm(`Close Trek - ${trek.trek_name}?`)) {
     return
   }
 
   try {
-
     await removeTrek(trek.id)
 
-    toast.success("Trek Closed Successfully")
+    toast.success('Trek Closed Successfully')
 
     loadTreks()
-
   } catch (err) {
-
-    toast.error(
-      err.response?.data?.message ||
-      "Operation Failed"
-    )
-
+    toast.error(err.response?.data?.message || 'Operation Failed')
   }
 }
 
@@ -155,15 +144,9 @@ async function handleSearch(query) {
   try {
     const response = await searchTreks(query)
     treks.value = response.data
-  } 
-  catch (err) {
-
-  toast.error(
-    err.response?.data?.message ||
-    "Search Failed"
-  )
-
-}
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Search Failed')
+  }
 }
 
 onMounted(loadTreks)

@@ -5,7 +5,8 @@
       <small class="tagline">TREKKING MGMT</small>
     </div>
 
-    <nav class="menu-group">
+    <!-- Admin Menu -->
+    <nav v-if="auth.role === 'admin'" class="menu-group">
       <RouterLink to="/admin" class="menu">
         <i class="bi bi-speedometer2"></i>
         <span>Dashboard</span>
@@ -26,8 +27,27 @@
         <span>Users</span>
       </RouterLink>
     </nav>
+
+    <!-- Staff Menu -->
+    <nav v-else-if="auth.role === 'staff'" class="menu-group">
+      <RouterLink to="/staff" class="menu">
+        <i class="bi bi-speedometer2"></i>
+        <span>Dashboard</span>
+      </RouterLink>
+
+      <RouterLink to="/staff/treks" class="menu">
+        <i class="bi bi-signpost-split"></i>
+        <span>Assigned Treks</span>
+      </RouterLink>
+    </nav>
   </div>
 </template>
+
+<script setup>
+import { useAuthStore } from "@/store/auth";
+
+const auth = useAuthStore();
+</script>
 
 <style scoped>
 .sidebar {
@@ -46,7 +66,7 @@
 }
 
 .logo {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: Georgia, "Times New Roman", serif;
   font-weight: 700;
   margin-bottom: 4px;
 }
