@@ -1,22 +1,31 @@
 import api from "./api";
 
-export function getTreks(){
-
+export function getTreks() {
     return api.get("/user/treks");
-
 }
 
-export function bookTrek(id){
+export function searchTreks(query) {
+    return api.get("/user/search", {
+        params: { query }
+    });
+}
 
+export function bookTrek(id) {
     return api.post(`/user/book/${id}`);
-
 }
 
-export function bookingHistory(){
-
-    return api.get("/user/bookings");
+export function bookingHistory() {
+    return api.get("/user/history");
 }
 
-export function exportHistory(taskId){
+export function cancelBooking(id) {
+    return api.delete(`/user/booking/${id}`);
+}
+
+export function exportBookings() {
+    return api.post("/user/history/export");
+}
+
+export function exportStatus(taskId) {
     return api.get(`/user/export/${taskId}`);
 }

@@ -1,23 +1,59 @@
-import api from "./api"
+import api from "./api";
 
-export const getTreks=()=>api.get("/admin/treks")
+// ---------------- Dashboard ----------------
 
-export const createTrek=(data)=>api.post("/admin/treks",data)
+export const getDashboard = () =>
+    api.get("/admin/dashboard");
 
-export const updateTrek=(id,data)=>api.put(`/admin/treks/${id}`,data)
+// ---------------- Treks ----------------
 
-export const removeTrek=(id)=>api.delete(`/admin/treks/${id}`)
+export const getTreks = () =>
+    api.get("/admin/treks");
 
-export const getStaff=()=>api.get("/admin/staff")
+export const createTrek = (data) =>
+    api.post("/admin/treks", data);
 
-export const getUsers=()=>api.get("/admin/users")
+export const updateTrek = (id, data) =>
+    api.put(`/admin/treks/${id}`, data);
 
-export const getSummary=()=>api.get("/admin/summary")
+export const removeTrek = (id) =>
+    api.delete(`/admin/treks/${id}`);
 
-export function searchTreks(query){
-    return api.get("/admin/search",{
-        params:{
-           query
-        }
+export const searchTreks = (query) =>
+    api.get("/admin/search/treks", {
+        params: { query }
     });
-}
+
+// ---------------- Staff ----------------
+
+export const getStaff = () =>
+    api.get("/admin/staff");
+
+export const createStaff = (data) =>
+    api.post("/admin/staff", data);
+
+export const updateStaff = (id, data) =>
+    api.put(`/admin/staff/${id}`, data);
+
+export const removeStaff = (id) =>
+    api.delete(`/admin/staff/${id}`);
+
+export const searchStaff = (query) =>
+    api.get("/admin/search/staff", {
+        params: { query }
+    });
+
+// ---------------- Users ----------------
+
+export const getUsers = () =>
+    api.get("/admin/users");
+
+export const searchUsers = (query) =>
+    api.get("/admin/search/users", {
+        params: { query }
+    });
+
+export const updateUserStatus = (id, status) =>
+    api.put(`/admin/users/${id}/status`, {
+        status
+    });

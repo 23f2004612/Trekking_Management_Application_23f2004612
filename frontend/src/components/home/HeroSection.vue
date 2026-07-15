@@ -67,6 +67,11 @@
     height: 90vh;
     background-size: cover;
     background-position: center;
+    height:calc(100vh - 68px);
+}
+
+body{
+    overflow-x:hidden;
 }
 
 .overlay{
